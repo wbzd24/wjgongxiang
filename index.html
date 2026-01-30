@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班级文件共享中心</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- 自定义样式 -->
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            padding-bottom: 2rem;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .file-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            height: 100%;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .file-icon-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+        }
+        
+        .file-icon {
+            font-size: 2.2rem;
+        }
+        
+        /* 文件类型颜色 */
+        .pdf-color { background-color: #ffeaea; color: #e53935; }
+        .word-color { background-color: #e8f4ff; color: #2b579a; }
+        .excel-color { background-color: #edf7ed; color: #217346; }
+        .image-color { background-color: #fff4e5; color: #ff9800; }
+        .video-color { background-color: #f3e5f5; color: #9c27b0; }
+        .zip-color { background-color: #f5f5f5; color: #757575; }
+        .text-color { background-color: #e8f5e9; color: #4caf50; }
+        .code-color { background-color: #e3f2fd; color: #1976d2; }
+        
+        .file-size {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .file-date {
+            font-size: 0.8rem;
+            color: #adb5bd;
+        }
+        
+        .file-type-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+        }
+        
+        .stats-card {
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .search-box {
+            border-radius: 50px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+        }
+        
+        .category-btn {
+            border-radius: 50px;
+            padding: 0.5rem 1.2rem;
+            margin: 0.2rem;
+            transition: all 0.2s;
+            border: 1px solid #dee2e6;
+        }
+        
+        .category-btn:hover, .category-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .footer {
+            margin-top: 3rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        /* 暗色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: #e9ecef;
+            }
+            
+            .file-card {
+                background-color: #2d3748;
+                color: #e9ecef;
+            }
+            
+            .search-box {
+                background-color: #374151;
+                border-color: #4b5563;
+                color: #e9ecef;
+            }
+            
+            .search-box::placeholder {
+                color: #9ca3af;
+            }
+            
+            .category-btn {
+                background-color: #374151;
+                border-color: #4b5563;
+                color: #e9ecef;
+            }
+            
+            .file-size {
+                color: #adb5bd;
+            }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .display-4 { font-size: 2.2rem; }
+            .lead { font-size: 1rem; }
+            .file-icon-container { width: 50px; height: 50px; }
+            .file-icon { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-folder2-open me-2"></i>
+                班级文件共享中心
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="badge bg-primary me-2">Beta</span>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                    <label class="form-check-label" for="darkModeToggle">暗色模式</label>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="container my-4">
+        <!-- 页面标题和统计 -->
+        <header class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">📂 班级共享文件库</h1>
+            <p class="lead text-muted mb-4">共 <span id="totalFiles" class="fw-bold text-primary">0</span> 个文件，总大小 <span id="totalSize" class="fw-bold text-primary">0 MB</span></p>
+            
+            <!-- 搜索框 -->
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-8 col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control search-box border-start-0" placeholder="搜索文件名、类型或描述...">
+                        <button class="btn btn-primary" type="button" id="clearSearch">
+                            <i class="bi bi-x-circle"></i> 清除
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 分类筛选 -->
+            <div class="d-flex flex-wrap justify-content-center mb-4">
+                <button class="category-btn active" data-category="all">全部文件</button>
+                <button class="category-btn" data-category="pdf">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> PDF文档
+                </button>
+                <button class="category-btn" data-category="word">
+                    <i class="bi bi-file-earmark-word me-1"></i> Word文档
+                </button>
+                <button class="category-btn" data-category="image">
+                    <i class="bi bi-images me-1"></i> 图片文件
+                </button>
+                <button class="category-btn" data-category="video">
+                    <i class="bi bi-camera-video me-1"></i> 视频文件
+                </button>
+                <button class="category-btn" data-category="other">
+                    <i class="bi bi-file-earmark me-1"></i> 其他文件
+                </button>
+            </div>
+        </header>
+
+        <!-- 文件展示区 -->
+        <section id="fileListSection">
+            <div class="row" id="fileList">
+                <!-- 文件卡片将通过JavaScript动态生成 -->
+            </div>
+            
+            <!-- 空状态提示 -->
+            <div id="noResults" class="text-center py-5 d-none">
+                <i class="bi bi-folder-x display-1 text-muted mb-3"></i>
+                <h3 class="text-muted">未找到匹配的文件</h3>
+                <p class="text-muted">尝试使用不同的搜索关键词或选择其他分类</p>
+            </div>
+        </section>
+        
+        <!-- 使用说明 -->
+        <section class="mt-5">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>使用说明</h5>
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-search text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6>快速搜索</h6>
+                                    <p class="small text-muted mb-0">使用搜索框按名称或类型查找文件</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-filter text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6>分类筛选</h6>
+                                    <p class="small text-muted mb-0">点击分类按钮查看特定类型文件</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-download text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6>查看与下载</h6>
+                                    <p class="small text-muted mb-0">点击文件卡片上的按钮进行操作</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer text-center">
+        <div class="container">
+            <hr class="my-4">
+            <p>
+                <i class="bi bi-code-slash me-1"></i> 
+                班级文件共享页面 &bull; 最后更新: <span id="currentDate"></span> &bull; 
+                共 <span id="fileCount">0</span> 个资源文件
+            </p>
+            <p class="small text-muted">
+                适配所有设备 &bull; 建议使用 Chrome/Edge/Safari 最新版本访问
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript 代码 -->
+    <script>
+        // 模拟 /wj 文件夹中的文件数据
+        const fileData = [
+            { id: 1, name: "[4k]罗小黑战记1.mp4", type: "mp4", size: "2.84 G", date: "2026-01-01", description: "电影资源", path: "文件共享/wj/[4k]罗小黑战记1.mp4" },
+            { id: 2, name: "[4k]罗小黑战记2.mp4", type: "mp4", size: "6.74 G", date: "2026-01-01", description: "电影资源", path: "文件共享/wj/[4k]罗小黑战记2.mp4" },
+        ];
+
+        // 文件类型到图标和颜色的映射
+        const fileTypeConfig = {
+            pdf: { icon: "bi-file-earmark-pdf", colorClass: "pdf-color", label: "PDF文档" },
+            word: { icon: "bi-file-earmark-word", colorClass: "word-color", label: "Word文档" },
+            excel: { icon: "bi-file-earmark-excel", colorClass: "excel-color", label: "Excel表格" },
+            image: { icon: "bi-image", colorClass: "image-color", label: "图片文件" },
+            video: { icon: "bi-camera-video", colorClass: "video-color", label: "视频文件" },
+            zip: { icon: "bi-file-earmark-zip", colorClass: "zip-color", label: "压缩文件" },
+            text: { icon: "bi-file-earmark-text", colorClass: "text-color", label: "文本文件" },
+            code: { icon: "bi-code-square", colorClass: "code-color", label: "代码文件" },
+            mp4: {icon: "bi-filetype-mp4", colorClass: "mp4-color", label: "视频文件" },
+            other: { icon: "bi-file-earmark", colorClass: "zip-color", label: "其他文件" }
+        };
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置当前日期
+            const currentDate = new Date().toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('currentDate').textContent = currentDate;
+            
+            // 初始化文件列表
+            renderFileList(fileData);
+            
+            // 初始化统计信息
+            updateFileStats(fileData);
+            
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                filterFiles(e.target.value);
+            });
+            
+            // 清除搜索
+            document.getElementById('clearSearch').addEventListener('click', function() {
+                document.getElementById('searchInput').value = '';
+                filterFiles('');
+            });
+            
+            // 分类筛选
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 更新活动按钮状态
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    filterByCategory(category);
+                });
+            });
+            
+            // 暗色模式切换
+            document.getElementById('darkModeToggle').addEventListener('change', function() {
+                document.body.setAttribute('data-bs-theme', this.checked ? 'dark' : 'light');
+            });
+        });
+
+        // 渲染文件列表
+        function renderFileList(files) {
+            const fileListContainer = document.getElementById('fileList');
+            const noResultsElement = document.getElementById('noResults');
+            
+            if (files.length === 0) {
+                fileListContainer.innerHTML = '';
+                noResultsElement.classList.remove('d-none');
+                return;
+            }
+            
+            noResultsElement.classList.add('d-none');
+            
+            let html = '';
+            
+            files.forEach(file => {
+                const typeConfig = fileTypeConfig[file.type] || fileTypeConfig.other;
+                const colClass = "col-12 col-sm-6 col-lg-4 col-xxl-3 mb-4";
+                
+                html += `
+                <div class="${colClass}">
+                    <div class="card file-card">
+                        <div class="card-body d-flex flex-column">
+                            <div class="text-center mb-3">
+                                <div class="file-icon-container ${typeConfig.colorClass}">
+                                    <i class="bi ${typeConfig.icon} file-icon"></i>
+                                </div>
+                            </div>
+                            
+                            <h6 class="card-title text-center mb-2" title="${file.name}">${truncateText(file.name, 20)}</h6>
+                            
+                            <p class="small text-muted text-center mb-3">${file.description || '暂无描述'}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="file-type-badge ${typeConfig.colorClass.split('-')[0]}">${typeConfig.label}</span>
+                                <span class="file-size">${file.size}</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="file-date"><i class="bi bi-calendar3 me-1"></i>${file.date}</span>
+                                <div>
+                                    <a href="${file.path}" class="btn btn-sm btn-outline-primary" title="查看文件" target="_blank">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="${file.path}" class="btn btn-sm btn-primary ms-1" title="下载文件" download>
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            fileListContainer.innerHTML = html;
+        }
+
+        // 过滤文件（搜索 + 分类）
+        function filterFiles(searchTerm) {
+            const activeCategory = document.querySelector('.category-btn.active').getAttribute('data-category');
+            let filtered = fileData;
+            
+            // 按搜索词过滤
+            if (searchTerm.trim() !== '') {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(file => 
+                    file.name.toLowerCase().includes(term) || 
+                    file.type.toLowerCase().includes(term) ||
+                    (file.description && file.description.toLowerCase().includes(term))
+                );
+            }
+            
+            // 按分类过滤
+            if (activeCategory !== 'all') {
+                filtered = filtered.filter(file => file.type === activeCategory);
+            }
+            
+            renderFileList(filtered);
+            updateFileStats(filtered);
+        }
+
+        // 按分类过滤文件
+        function filterByCategory(category) {
+            const searchTerm = document.getElementById('searchInput').value;
+            filterFiles(searchTerm);
+        }
+
+        // 更新文件统计信息
+        function updateFileStats(files) {
+            document.getElementById('totalFiles').textContent = files.length;
+            document.getElementById('fileCount').textContent = files.length;
+            
+            // 计算总大小（简单示例，实际应从数据计算）
+            const totalSizeMB = files.reduce((sum, file) => {
+                const sizeNum = parseFloat(file.size);
+                return sum + (isNaN(sizeNum) ? 0 : sizeNum);
+            }, 0);
+            
+            document.getElementById('totalSize').textContent = totalSizeMB.toFixed(1);
+        }
+
+        // 文本截断函数
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+    </script>
+</body>
+</html>
